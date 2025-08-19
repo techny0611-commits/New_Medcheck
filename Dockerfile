@@ -14,7 +14,7 @@ COPY vite.config.ts ./
 COPY tsconfig.json ./
 
 # התקנת dependencies
-RUN npm ci --only=production
+RUN npm ci
 
 # התקנת Wrangler לצורך development
 RUN npm install -g wrangler
