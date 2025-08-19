@@ -1,5 +1,5 @@
 # Dockerfile למערכת ניהול בדיקות רפואיות
-FROM node:18-alpine
+FROM node:20-alpine
 
 # התקן PM2 גלובלית
 RUN npm install -g pm2
@@ -15,9 +15,6 @@ COPY tsconfig.json ./
 
 # התקנת dependencies
 RUN npm ci
-
-# התקנת Wrangler לצורך development
-RUN npm install -g wrangler
 
 # העתקת קבצי המקור
 COPY src/ ./src/
@@ -37,6 +34,9 @@ USER nodejs
 
 # פריצת פורט
 EXPOSE 3001
+
+# התקן curl לhealth check
+RUN apk add --no-cache curl
 
 # הגדרת health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
