@@ -1,0 +1,94 @@
+# Docker Compose למערכת ניהול בדיקות רפואיות מלאה
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: webapp-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: webapp
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - webapp-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Main Application
+  webapp:
+    build: .
+    container_name: webapp-app
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      # MongoDB Connection
+      MONGODB_URI: mongodb://admin:password123@mongodb:27017/webapp?authSource=admin
+      
+      # Supabase Settings (חובה - צריך להחליף עם הערכים שלך)
+      SUPABASE_URL: https://your-project.supabase.co
+      SUPABASE_ANON_KEY: your_anon_key_here
+      
+      # SMTP Settings (אופציונלי - ניתן להגדיר במערכת)
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: your_email@gmail.com
+      SMTP_PASSWORD: your_app_password
+      
+      # Application Settings
+      BASE_URL: http://localhost:3001
+      NODE_ENV: production
+      PORT: 3001
+    volumes:
+      # Volume לקבצים מועלים (אופציונלי)
+      - uploaded_files:/app/uploads
+    networks:
+      - webapp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis לצורך caching (אופציונלי)
+  redis:
+    image: redis:7-alpine
+    container_name: webapp-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - webapp-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  webapp-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local
+  uploaded_files:
+    driver: local
+  redis_data:
+    driver: local

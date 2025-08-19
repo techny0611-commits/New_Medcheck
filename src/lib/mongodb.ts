@@ -4,7 +4,7 @@ let client: MongoClient;
 let db: Db;
 let bucket: GridFSBucket;
 
-export async function connectToMongoDB(uri?: string): Promise<Db> {
+export async function connectToMongoDB(uri?: string): Promise<Db | null> {
   if (db) {
     return db;
   }
@@ -25,14 +25,15 @@ export async function connectToMongoDB(uri?: string): Promise<Db> {
     console.log('Connected to MongoDB successfully');
     return db;
   } catch (error) {
-    console.error('MongoDB connection error:', error);
-    throw error;
+    console.warn('MongoDB connection failed - running without database:', error);
+    // Don't throw error, allow app to run without database for development/testing
+    return null;
   }
 }
 
 export function getDB(): Db {
   if (!db) {
-    throw new Error('Database not initialized. Call connectToMongoDB first.');
+    throw new Error('Database not available. Please configure MongoDB connection.');
   }
   return db;
 }
@@ -53,7 +54,7 @@ export async function closeMongoDB(): Promise<void> {
 
 // Helper function to generate unique registration links
 export function generateRegistrationLink(eventId: string): string {
-  const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+  const baseUrl = process.env.BASE_URL || 'http://localhost:3001';
   return `${baseUrl}/register/${eventId}`;
 }
 

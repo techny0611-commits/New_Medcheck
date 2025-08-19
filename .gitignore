@@ -31,3 +31,12 @@ lerna-debug.log*
 
 # misc
 .DS_Store
+
+# Docker
+.dockerignore
+
+# Backup files
+*.backup
+*.bak
+*.tar.gz
+*.zip

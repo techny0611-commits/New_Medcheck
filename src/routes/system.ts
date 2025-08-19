@@ -3,6 +3,7 @@ import { ObjectId } from 'mongodb'
 import { getDB, getGridFSBucket } from '../lib/mongodb'
 import { extractUserFromToken } from '../lib/supabase'
 import { SystemSettings, User, ApiResponse } from '../types'
+import { EmailService } from '../lib/email'
 
 const system = new Hono()
 
@@ -20,33 +21,42 @@ system.get('/settings', async (c) => {
     }
 
     const db = getDB()
-    const systemCollection = db.collection<SystemSettings>('systemSettings')
+    const systemCollection = db.collection('systemSettings')
     
     // Get current settings or return defaults
     const settings = await systemCollection.findOne({})
     
-    const defaultSettings: SystemSettings = {
+    const defaultSettings = {
       systemName: 'מערכת ניהול בדיקות',
-      menuColorPalette: {
-        primary: '#a3e4d7',     // Soft mint
-        secondary: '#fbb6ce',   // Soft pink  
-        accent: '#a78bfa',      // Soft purple
-        background: '#f1f5f9',  // Light gray
-        text: '#334155'         // Dark gray
+      organizationName: '',
+      adminEmail: '',
+      smtpSettings: {
+        host: '',
+        port: 587,
+        username: '',
+        password: '',
+        useAuth: true,
+        useTLS: true
       },
-      logoPosition: 'left',
-      emailProvider: 'gmail',
-      emailSettings: {
-        gmail: {
-          email: '',
-          appPassword: ''
-        }
+      emailTemplates: {
+        confirmationSubject: 'אישור רישום לבדיקה - {organizationName}',
+        confirmationBody: 'שלום {employeeName},\n\nרישומך לבדיקה באירוע {organizationName} אושר בהצלחה.\n\nפרטי הבדיקה:\nתאריך: {eventDate}\nשעה: {timeSlot}\n\nתודה!',
+        reminderSubject: 'תזכורת - בדיקה מחר ב{organizationName}',
+        reminderBody: 'שלום {employeeName},\n\nמזכירים לך שיש לך בדיקה מחר:\n\nתאריך: {eventDate}\nשעה: {timeSlot}\nמיקום: {organizationName}\n\nבברכה!'
+      },
+      systemSettings: {
+        defaultTestDuration: 30,
+        defaultBreakDuration: 10,
+        allowWalkIns: true,
+        requirePhoneValidation: true,
+        maxParticipantsPerEvent: 500,
+        advanceBookingDays: 30
       },
       updatedAt: new Date(),
       updatedBy: userInfo.userId
     }
 
-    return c.json<ApiResponse<SystemSettings>>({
+    return c.json<ApiResponse<any>>({
       success: true,
       data: settings || defaultSettings
     })
@@ -61,7 +71,7 @@ system.get('/settings', async (c) => {
 })
 
 // Update system settings (admin only)
-system.put('/settings', async (c) => {
+system.post('/settings', async (c) => {
   try {
     const authHeader = c.req.header('Authorization')
     const userInfo = extractUserFromToken(authHeader)
@@ -75,7 +85,7 @@ system.put('/settings', async (c) => {
 
     const db = getDB()
     const usersCollection = db.collection<User>('users')
-    const systemCollection = db.collection<SystemSettings>('systemSettings')
+    const systemCollection = db.collection('systemSettings')
     
     // Check if user is admin
     const currentUser = await usersCollection.findOne({ 
@@ -298,6 +308,72 @@ system.get('/icons', async (c) => {
     success: true,
     data: icons
   })
+})
+
+// Test email connection
+system.post('/test-email', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    const userInfo = extractUserFromToken(authHeader)
+    
+    if (!userInfo) {
+      return c.json<ApiResponse<null>>({
+        success: false,
+        error: 'Unauthorized'
+      }, 401)
+    }
+
+    const db = getDB()
+    const usersCollection = db.collection<User>('users')
+    
+    // Check if user is admin
+    const currentUser = await usersCollection.findOne({ 
+      supabaseUserId: userInfo.userId 
+    })
+    
+    if (!currentUser || currentUser.role !== 'admin') {
+      return c.json<ApiResponse<null>>({
+        success: false,
+        error: 'Admin access required'
+      }, 403)
+    }
+
+    const { smtpSettings } = await c.req.json()
+    
+    // Validate required fields
+    if (!smtpSettings.host || !smtpSettings.username || !smtpSettings.password) {
+      return c.json<ApiResponse<null>>({
+        success: false,
+        error: 'Missing required SMTP settings'
+      }, 400)
+    }
+
+    // Create email service with provided settings
+    const emailService = new EmailService(smtpSettings)
+    
+    // Send test email
+    const testRecipient = smtpSettings.username // Send to the same email as sender
+    const testResult = await emailService.sendTestEmail(testRecipient)
+    
+    if (testResult) {
+      return c.json<ApiResponse<null>>({
+        success: true,
+        message: 'SMTP connection test successful. Test email sent!'
+      })
+    } else {
+      return c.json<ApiResponse<null>>({
+        success: false,
+        error: 'SMTP connection test failed. Please check your settings.'
+      }, 400)
+    }
+
+  } catch (error) {
+    console.error('SMTP test error:', error)
+    return c.json<ApiResponse<null>>({
+      success: false,
+      error: 'SMTP connection test failed'
+    }, 500)
+  }
 })
 
 export default system

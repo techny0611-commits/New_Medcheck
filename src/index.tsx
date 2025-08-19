@@ -11,6 +11,8 @@ import eventsRoutes from './routes/events'
 import usersRoutes from './routes/users'
 import reportsRoutes from './routes/reports'
 import systemRoutes from './routes/system'
+import registrationRoutes from './routes/registration'
+import employeesRoutes from './routes/employees'
 
 const app = new Hono()
 
@@ -33,7 +35,7 @@ app.use('*', async (c, next) => {
 
 // Enable CORS for API routes
 app.use('/api/*', cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173'],
+  origin: ['http://localhost:3001', 'http://localhost:5173'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -45,12 +47,23 @@ app.use('/static/*', serveStatic({ root: './public' }))
 // Use renderer for React pages
 app.use(renderer)
 
+// Health check endpoint
+app.get('/api/health', (c) => {
+  return c.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    message: 'Health Testing and Sales Management System is running'
+  })
+})
+
 // API Routes
 app.route('/api/auth', authRoutes)
 app.route('/api/events', eventsRoutes)
 app.route('/api/users', usersRoutes)
 app.route('/api/reports', reportsRoutes)
 app.route('/api/system', systemRoutes)
+app.route('/api/registration', registrationRoutes)
+app.route('/api/employees', employeesRoutes)
 
 // Main app page (React SPA)
 app.get('/', (c) => {

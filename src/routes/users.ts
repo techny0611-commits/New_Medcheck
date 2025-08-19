@@ -50,6 +50,89 @@ users.get('/', async (c) => {
   }
 })
 
+// Create user (admin only)
+users.post('/', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization')
+    const userInfo = extractUserFromToken(authHeader)
+    
+    if (!userInfo) {
+      return c.json<ApiResponse<null>>({
+        success: false,
+        error: 'Unauthorized'
+      }, 401)
+    }
+
+    const { name, email, role, password } = await c.req.json()
+
+    const db = getDB()
+    const usersCollection = db.collection<User>('users')
+    
+    // Check if current user is admin
+    const currentUser = await usersCollection.findOne({ 
+      supabaseUserId: userInfo.userId 
+    })
+    
+    if (!currentUser || currentUser.role !== 'admin') {
+      return c.json<ApiResponse<null>>({
+        success: false,
+        error: 'Admin access required'
+      }, 403)
+    }
+
+    // Validate required fields
+    if (!name || !email || !password) {
+      return c.json<ApiResponse<null>>({
+        success: false,
+        error: 'Name, email, and password are required'
+      }, 400)
+    }
+
+    // Validate role
+    const validRole = role || 'tester'
+    if (!['admin', 'tester'].includes(validRole)) {
+      return c.json<ApiResponse<null>>({
+        success: false,
+        error: 'Invalid role. Must be "admin" or "tester"'
+      }, 400)
+    }
+
+    // Check if email already exists
+    const existingUser = await usersCollection.findOne({ email })
+    if (existingUser) {
+      return c.json<ApiResponse<null>>({
+        success: false,
+        error: 'Email already exists'
+      }, 400)
+    }
+
+    // Create new user
+    const newUser: Partial<User> = {
+      name,
+      email,
+      role: validRole as 'admin' | 'tester',
+      supabaseUserId: `manual_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Temporary ID for manual users
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+
+    const result = await usersCollection.insertOne(newUser as User)
+
+    return c.json<ApiResponse<{ userId: string }>>({
+      success: true,
+      data: { userId: result.insertedId.toString() },
+      message: 'User created successfully'
+    })
+
+  } catch (error) {
+    console.error('User creation error:', error)
+    return c.json<ApiResponse<null>>({
+      success: false,
+      error: 'Internal server error'
+    }, 500)
+  }
+})
+
 // Update user (admin only)
 users.put('/:userId', async (c) => {
   try {

@@ -58,6 +58,11 @@ export const renderer = jsxRenderer(({ children }) => {
         
         {/* Main React App */}
         <script type="module" src="/static/app.js"></script>
+        
+        {/* Registration App (only loads on registration pages) */}
+        {children && children.props && children.props.id === 'registration-root' && 
+          React.createElement('script', { type: 'module', src: '/static/registration.js' })
+        }
       </body>
     </html>
   )
