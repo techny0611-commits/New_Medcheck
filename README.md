@@ -1,21 +1,223 @@
-```txt
+# מערכת ניהול בדיקות רפואיות ומכירות
+
+מערכת מתקדמת לניהול אירועי בדיקות רפואיות ומכירות עבור עובדי ארגונים וחברות, הכוללת ניהול רישום, שיבוץ זמנים, מעקב תוצאות ודיווחים מפורטים.
+
+## 🎯 תכונות עיקריות
+
+### לאדמינים
+- **מבט על כללי**: דשבורד עם סטטיסטיקות חודשיות ונתונים מפורטים
+- **ניהול אירועים**: יצירת ועריכת אירועים, הגדרת לוח זמנים והפסקות
+- **ניהול משתמשים**: הוספת משתמשים ועדכון תפקידים
+- **דוחות מפורטים**: דוחות חודשיים ורשימות עובדים לכל אירוע
+- **הגדרות מערכת**: עיצוב ממשק, צבעים, לוגו ואייקונים
+
+### לבודקים/מוכרים
+- **ניהול אירועים**: צפייה באירועים מתוכננים ובהכנה
+- **ניהול נרשמים**: שיבוץ עובדים מרשימת ההמתנה
+- **רישום תוצאות**: הזנת תוצאות בדיקות ופרטי עסקאות
+- **העברת סטטוס**: העברת עובדים בין רשימות
+
+### עובדי הארגונים
+- **רישום לאירועים**: רישום דרך קישור מותאם אישית
+- **שיבוץ עצמי**: בחירת זמנים פנויים או הצטרפות לרשימת המתנה
+- **עדכוני סטטוס**: הודעות מייל על שינויים בשיבוץ
+
+## 🏗 ארכיטקטורה טכנית
+
+### Backend
+- **Framework**: Hono (TypeScript) - מסגרת עבודה קלילה וביצועים גבוהים
+- **Database**: MongoDB - מסד נתונים גמיש עם GridFS לקבצים
+- **Authentication**: Supabase Auth עם תמיכה ב-Google OAuth
+- **API**: RESTful API עם אבטחה מבוססת JWT
+
+### Frontend
+- **Framework**: React 18 עם vanilla JavaScript (ללא build complexity)
+- **Styling**: TailwindCSS עם עיצוב פסטלים מותאם
+- **Icons**: Heroicons - אייקונים מודרניים ונקיים
+- **RTL Support**: תמיכה מלאה בעברית ו-RTL
+- **Responsive**: מותאם למובייל ודסקטופ
+
+### Infrastructure
+- **Deployment**: Cloudflare Pages (edge computing)
+- **Process Management**: PM2 לניהול תהליכים
+- **Storage**: MongoDB GridFS לקבצים
+- **Email**: Gmail API/SMTP
+
+## 📊 מבנה נתונים
+
+### מודלי נתונים עיקריים
+- **Users**: משתמשים עם תפקידים (admin/tester)
+- **Events**: אירועים עם הגדרות מלאות
+- **TimeSlots**: סלוטי זמן דינמיים לכל אירוע
+- **Employees**: עובדים רשומים עם סטטוס
+- **TestResults**: תוצאות בדיקות ועסקאות
+- **SystemSettings**: הגדרות מערכת ועיצוב
+
+### יחסים בין נתונים
+- אירוע → סלוטי זמן (1:N)
+- אירוע → עובדים רשומים (1:N)
+- עובד → תוצאות בדיקה (1:1)
+- משתמש → אירועים שנוצרו (1:N)
+
+## 🚀 התקנה והפעלה
+
+### דרישות מערכת
+- Node.js 18+
+- MongoDB (מקומי או Atlas)
+- Supabase Project (לאימות)
+
+### התקנה
+```bash
+# Clone the repository
+git clone <repository-url>
+cd webapp
+
+# התקנת תלותיות
 npm install
+
+# העתקת והגדרת environment variables
+cp .dev.vars.example .dev.vars
+# ערוך את .dev.vars עם הנתונים שלך
+
+# בניית הפרויקט
+npm run build
+
+# הפעלת השרת
+npm run dev:sandbox
+# או עם PM2:
+pm2 start ecosystem.config.cjs
+```
+
+### הגדרת environment variables
+```bash
+# MongoDB
+MONGODB_URI=mongodb://localhost:27017/webapp
+
+# Supabase
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your_anon_key
+
+# Gmail (אופציונלי)
+GMAIL_USER=your_email@gmail.com
+GMAIL_APP_PASSWORD=your_app_password
+```
+
+## 📱 מדריך שימוש
+
+### למנהלי מערכת
+1. **התחברות**: התחבר עם Google או מייל/סיסמה
+2. **יצירת אירוע**: ב"ניהול אירועים" לחץ "צור אירוע חדש"
+3. **הגדרת פרטים**: מלא פרטי ארגון, תאריכים וזמנים
+4. **עיצוב דף רישום**: בחר צבעים, אייקון והוסף באנר
+5. **שתף קישור**: העתק את קישור הרישום לנציג הארגון
+
+### לבודקים
+1. **צפייה באירועים**: ראה אירועים מתוכננים
+2. **ניהול נרשמים**: שבץ עובדים מרשימת המתנה
+3. **רישום תוצאות**: הזן תוצאות בדיקות וסכומי עסקאות
+4. **העברת סטטוס**: העבר עובדים בין רשימות בהתאם לצורך
+
+### לעובדי ארגונים
+1. **קבלת קישור**: קבל קישור רישום מנציג החברה
+2. **רישום לאירוע**: הזן פרטים אישיים וסיסמת אירוע
+3. **סימון בעיות**: סמן בעיות רפואיות רלוונטיות (אם יש)
+4. **שיבוץ זמן**: בחר זמן פנוי או הצטרף לרשימת המתנה
+
+## 🔧 תכונות מתקדמות
+
+### מערכת סלוטי זמן
+- יצירה אוטומטית של סלוטי זמן על בסיס פרמטרים
+- הפסקות מותאמות אישית
+- ניהול דינמי של זמינות
+
+### מערכת מיילים
+- הודעות אוטומטיות לעובדים
+- עדכונים על שינוי סטטוס
+- התראות למנהלים
+
+### דוחות ואנליטיקה
+- דוחות חודשיים מפורטים
+- סטטיסטיקות מכירות ובדיקות
+- ייצוא לקבצי CSV
+
+### אבטחה
+- אימות מבוסס JWT
+- הרשאות ברמת תפקידים
+- הצפנת נתונים רגישים
+
+## 🛠 פיתוח
+
+### מבנה פרויקט
+```
+webapp/
+├── src/
+│   ├── index.tsx          # נקודת כניסה ראשית
+│   ├── renderer.tsx       # HTML renderer
+│   ├── types/             # הגדרות TypeScript
+│   ├── lib/               # ספריות עזר (MongoDB, Supabase)
+│   └── routes/            # API routes
+├── public/static/         # קבצים סטטיים
+├── ecosystem.config.cjs   # PM2 configuration
+├── package.json          # תלותיות
+└── wrangler.jsonc        # Cloudflare configuration
+```
+
+### API Endpoints
+- `POST /api/auth/register` - רישום משתמש חדש
+- `GET /api/events` - רשימת אירועים (עם סינון לפי תפקיד)
+- `POST /api/events` - יצירת אירוע חדש (אדמין)
+- `GET /api/reports/monthly` - דוח חודשי (אדמין)
+- `GET /api/system/settings` - הגדרות מערכת
+
+### Commands שימושיים
+```bash
+# פיתוח
 npm run dev
+
+# בנייה
+npm run build
+
+# PM2 management
+pm2 list
+pm2 logs webapp --nostream
+pm2 restart webapp
+pm2 stop webapp
 ```
 
-```txt
-npm run deploy
-```
+## 🌐 URLs נוכחיים
 
-[For generating/synchronizing types based on your Worker configuration run](https://developers.cloudflare.com/workers/wrangler/commands/#types):
+- **Development Server**: https://3000-itk6obet1atz6cr8xlr0d-6532622b.e2b.dev
+- **Health Check**: https://3000-itk6obet1atz6cr8xlr0d-6532622b.e2b.dev/
 
-```txt
-npm run cf-typegen
-```
+## 📈 סטטוס פיתוח
 
-Pass the `CloudflareBindings` as generics when instantiation `Hono`:
+### ✅ הושלם
+- ארכיטקטורה בסיסית ומבנה פרויקט
+- מערכת אימות עם Supabase
+- API מלא לכל התכונות העיקריות
+- ממשק משתמש בסיסי עם עיצוב RTL
+- מערכת תפקידים ורשאות
+- ניהול קבצים עם GridFS
 
-```ts
-// src/index.ts
-const app = new Hono<{ Bindings: CloudflareBindings }>()
-```
+### 🔄 בעבודה
+- מסכי ניהול מפורטים
+- אינטגרציה מלאה עם frontend
+- מסכי דוחות ויזואליים
+- מערכת מיילים
+
+### 📋 המשך הפיתוח
+1. השלמת מסכי הפרונט-אנד
+2. בדיקות מקיפות
+3. אינטגרציה עם MongoDB Atlas
+4. הגדרת Supabase authentication
+5. פריסה לסביבת ייצור
+
+## 🤝 תרומה
+
+הפרויקט מתפתח בכיוון של מערכת מתקדמת וידידותית למשתמש. כל הערה או בקשת תכונה מתקבלת בברכה.
+
+---
+
+**פותח על ידי**: מערכת AI מתקדמת  
+**גירסה**: 1.0.0-beta  
+**עדכון אחרון**: 2025-01-19
