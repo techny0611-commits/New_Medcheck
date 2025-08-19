@@ -9,6 +9,8 @@
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "hono/jsx",
     "types": ["@cloudflare/workers-types"]
   },
   "include": ["src/**/*"],

@@ -44,8 +44,7 @@ app.use('/api/*', cors({
 // Serve static files
 app.use('/static/*', serveStatic({ root: './public' }))
 
-// Use renderer for React pages
-app.use(renderer)
+
 
 // Health check endpoint
 app.get('/api/health', (c) => {
@@ -67,25 +66,19 @@ app.route('/api/employees', employeesRoutes)
 
 // Main app page (React SPA)
 app.get('/', (c) => {
-  return c.render(
-    <div id="root"></div>
-  )
+  return renderer(c, '<div id="root"></div>')
 })
 
 // Registration page for employees (no auth required)
 app.get('/register/:eventId', async (c) => {
   const eventId = c.req.param('eventId')
   
-  return c.render(
-    <div id="registration-root" data-event-id={eventId}></div>
-  )
+  return renderer(c, `<div id="registration-root" data-event-id="${eventId}"></div>`)
 })
 
 // Catch all other routes and serve React app
 app.get('*', (c) => {
-  return c.render(
-    <div id="root"></div>
-  )
+  return renderer(c, '<div id="root"></div>')
 })
 
 export default app

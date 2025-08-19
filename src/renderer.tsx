@@ -1,25 +1,25 @@
-import { jsxRenderer } from 'hono/jsx-renderer'
+import { Context } from 'hono'
 
-export const renderer = jsxRenderer(({ children }) => {
-  return (
+export const renderer = (c: Context, content: string) => {
+  return c.html(`
+    <!DOCTYPE html>
     <html lang="he" dir="rtl">
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>מערכת ניהול בדיקות</title>
         
-        {/* Tailwind CSS */}
+        <!-- Tailwind CSS -->
         <script src="https://cdn.tailwindcss.com"></script>
         
-        {/* Heroicons */}
+        <!-- Heroicons -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@heroicons/react@2.0.0/24/outline/index.css" />
         
-        {/* Custom CSS */}
+        <!-- Custom CSS -->
         <link href="/static/style.css" rel="stylesheet" />
         
-        {/* Configure Tailwind for RTL */}
-        <script dangerouslySetInnerHTML={{
-          __html: `
+        <!-- Configure Tailwind for RTL -->
+        <script>
             tailwind.config = {
               theme: {
                 extend: {
@@ -40,30 +40,24 @@ export const renderer = jsxRenderer(({ children }) => {
                 }
               }
             }
-          `
-        }} />
+        </script>
         
-        {/* Hebrew Font */}
+        <!-- Hebrew Font -->
         <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body class="font-sans bg-gray-50 text-gray-900" dir="rtl">
-        {children}
+        ${content}
         
-        {/* React and ReactDOM */}
+        <!-- React and ReactDOM -->
         <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
         <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
         
-        {/* Axios for HTTP requests */}
+        <!-- Axios for HTTP requests -->
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         
-        {/* Main React App */}
+        <!-- Main React App -->
         <script type="module" src="/static/app.js"></script>
-        
-        {/* Registration App (only loads on registration pages) */}
-        {children && children.props && children.props.id === 'registration-root' && 
-          React.createElement('script', { type: 'module', src: '/static/registration.js' })
-        }
       </body>
     </html>
-  )
-})
+  `)
+}
