@@ -2,8 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'webapp',
-      script: 'npx',
-      args: 'wrangler pages dev dist --ip 0.0.0.0 --port 3001',
+      script: 'simple-server.js',
       env: {
         NODE_ENV: 'development',
         PORT: 3001,
