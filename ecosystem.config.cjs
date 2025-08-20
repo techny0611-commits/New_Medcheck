@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'webapp',
-      script: 'simple-server.js',
+      script: 'simple-server.cjs',
       env: {
         NODE_ENV: 'development',
         PORT: 3001,
