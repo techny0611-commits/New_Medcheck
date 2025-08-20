@@ -333,7 +333,7 @@ npm run clean-port               # ניקוי port
 - **Development Server**: https://3001-itk6obet1atz6cr8xlr0d-6532622b.e2b.dev
 - **Health Check**: https://3001-itk6obet1atz6cr8xlr0d-6532622b.e2b.dev/api/health
 - **Admin Login**: admin@health.system / admin123
-- **GitHub Repository**: [להגדיר לאחר push]
+- **GitHub Repository**: https://github.com/techny0611-commits/New_Medcheck
 
 ## 🆕 תיקונים שבוצעו - אוגוסט 2024
 
