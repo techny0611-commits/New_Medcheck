@@ -8,7 +8,7 @@ const crypto = require('crypto');
 const PORT = process.env.PORT || 3001;
 
 // MongoDB configuration - will work with Docker or external MongoDB
-const MONGO_URI = process.env.MONGODB_URI || 'mongodb://admin:password123@localhost:27017/webapp?authSource=admin';
+const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/webapp';
 let db = null;
 let client = null;
 
@@ -1544,7 +1544,7 @@ const server = http.createServer(async (req, res) => {
                             className: 'text-gray-600'
                         }, 'טוען את המערכת...')
                     ])
-                ])));
+                ]));
             }
         }
     </script>
