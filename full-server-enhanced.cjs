@@ -416,6 +416,180 @@ const server = http.createServer(async (req, res) => {
     }
   }
   
+  // Events endpoints
+  if (pathname === '/api/events/dashboard' && method === 'GET') {
+    try {
+      // Sample dashboard data
+      const sampleData = {
+        currentMonth: {
+          totalEvents: 12,
+          completedEvents: 8,
+          upcomingEvents: 4,
+          totalRevenue: 45600,
+          averageTransaction: 2850,
+          testToSaleRatio: 67
+        },
+        recentEvents: [
+          {
+            _id: '1',
+            eventName: 'בדיקות בריאות - חברת ABC',
+            eventDate: new Date().toISOString(),
+            status: 'completed',
+            totalRegistered: 45,
+            totalTested: 42,
+            totalRevenue: 12600,
+            totalWaiting: 3
+          },
+          {
+            _id: '2', 
+            eventName: 'יום בדיקות - משרדי ממשלה',
+            eventDate: new Date(Date.now() + 86400000).toISOString(),
+            status: 'planned',
+            totalRegistered: 38,
+            totalTested: 0,
+            totalRevenue: 0,
+            totalWaiting: 38
+          },
+          {
+            _id: '3',
+            eventName: 'בדיקות בכירים - חברת XYZ',
+            eventDate: new Date(Date.now() - 2*86400000).toISOString(),
+            status: 'completed',
+            totalRegistered: 25,
+            totalTested: 25,
+            totalRevenue: 18750,
+            totalWaiting: 0
+          }
+        ]
+      };
+
+      res.writeHead(200, corsHeaders);
+      res.end(JSON.stringify({
+        success: true,
+        data: sampleData
+      }));
+      
+    } catch (error) {
+      console.error('Dashboard error:', error);
+      res.writeHead(500, corsHeaders);
+      res.end(JSON.stringify({
+        success: false,
+        error: 'שגיאה פנימית'
+      }));
+    }
+    return;
+  }
+
+  if (pathname === '/api/events' && method === 'GET') {
+    try {
+      // Sample events data
+      const sampleEvents = [
+        {
+          _id: '1',
+          eventName: 'בדיקות בריאות - חברת ABC',
+          eventDate: new Date().toISOString(),
+          location: 'תל אביב, רחוב דיזנגוף 123',
+          status: 'completed',
+          maxCapacity: 50,
+          totalRegistered: 45,
+          totalTested: 42,
+          totalRevenue: 12600,
+          createdAt: new Date(Date.now() - 7*86400000).toISOString()
+        },
+        {
+          _id: '2',
+          eventName: 'יום בדיקות - משרדי ממשלה', 
+          eventDate: new Date(Date.now() + 86400000).toISOString(),
+          location: 'ירושלים, קריית הממשלה',
+          status: 'planned',
+          maxCapacity: 40,
+          totalRegistered: 38,
+          totalTested: 0,
+          totalRevenue: 0,
+          createdAt: new Date(Date.now() - 3*86400000).toISOString()
+        },
+        {
+          _id: '3',
+          eventName: 'בדיקות בכירים - חברת XYZ',
+          eventDate: new Date(Date.now() - 2*86400000).toISOString(), 
+          location: 'חיפה, אזור התעשייה',
+          status: 'completed',
+          maxCapacity: 30,
+          totalRegistered: 25,
+          totalTested: 25,
+          totalRevenue: 18750,
+          createdAt: new Date(Date.now() - 10*86400000).toISOString()
+        }
+      ];
+
+      res.writeHead(200, corsHeaders);
+      res.end(JSON.stringify({
+        success: true,
+        data: sampleEvents
+      }));
+      
+    } catch (error) {
+      console.error('Events error:', error);
+      res.writeHead(500, corsHeaders);
+      res.end(JSON.stringify({
+        success: false,
+        error: 'שגיאה פנימית'
+      }));
+    }
+    return;
+  }
+
+  // Users endpoints
+  if (pathname === '/api/users' && method === 'GET') {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.writeHead(401, corsHeaders);
+        res.end(JSON.stringify({
+          success: false,
+          error: 'לא מורשה'
+        }));
+        return;
+      }
+
+      const token = authHeader.split(' ')[1];
+      const decoded = verifyToken(token);
+      
+      if (!decoded) {
+        res.writeHead(401, corsHeaders);
+        res.end(JSON.stringify({
+          success: false,
+          error: 'טוקן לא תקין'
+        }));
+        return;
+      }
+
+      const usersCollection = db.collection('users');
+      const users = await usersCollection.find({}).toArray();
+      
+      // Remove passwords from response
+      const safeUsers = users.map(user => {
+        const { password, ...userWithoutPassword } = user;
+        return userWithoutPassword;
+      });
+
+      res.writeHead(200, corsHeaders);
+      res.end(JSON.stringify({
+        success: true,
+        data: safeUsers
+      }));
+      
+    } catch (error) {
+      console.error('Users fetch error:', error);
+      res.writeHead(500, corsHeaders);
+      res.end(JSON.stringify({
+        success: false,
+        error: 'שגיאה פנימית'
+      }));
+    }
+    return;
+  }
+
   // Other API endpoints (placeholders for now)
   if (pathname.startsWith('/api/')) {
     res.writeHead(200, corsHeaders);
@@ -537,70 +711,11 @@ const server = http.createServer(async (req, res) => {
         outline: none;
       }
 
-      /* Admin Info Banner Styles */
-      .admin-info-banner {
-        background: linear-gradient(135deg, #FDF4E8, #F8D0B8);
-        border: 2px solid #F8D0B8;
-        border-radius: 12px;
-        padding: 16px;
-        margin: 16px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        animation: slideDown 0.5s ease-out;
-      }
-      
-      @keyframes slideDown {
-        from {
-          opacity: 0;
-          transform: translateY(-20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      
-      .admin-credentials {
-        background: rgba(255, 255, 255, 0.8);
-        border-radius: 8px;
-        padding: 12px;
-        font-family: 'Courier New', monospace;
-        direction: ltr;
-        text-align: left;
-      }
+
     </style>
 </head>
 <body class="bg-gradient-to-br from-pastel-mint via-pastel-blue to-pastel-pink min-h-screen">
-    <!-- Admin Info Banner -->
-    <div class="admin-info-banner">
-        <div class="flex items-start space-x-3 rtl:space-x-reverse">
-            <div class="flex-shrink-0">
-                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-            <div class="flex-1">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">
-                    🔐 פרטי התחברות למנהל המערכת
-                </h3>
-                <p class="text-gray-700 mb-3">
-                    נוצר משתמש מנהל ראשוני במערכת. אנא השתמשו בפרטים הבאים להתחברות:
-                </p>
-                <div class="admin-credentials">
-                    <div class="mb-2">
-                        <strong>📧 Email:</strong> admin@health.system
-                    </div>
-                    <div class="mb-2">
-                        <strong>🔑 Password:</strong> admin123
-                    </div>
-                </div>
-                <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p class="text-sm text-yellow-800">
-                        <strong>⚠️ חשוב:</strong> אנא שנו את הסיסמה לאחר ההתחברות הראשונה למערכת לצורכי אבטחה.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
+
     
     <div id="root"></div>
     
