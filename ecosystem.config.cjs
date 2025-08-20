@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'webapp',
-      script: 'full-server-enhanced.cjs',
+      script: 'working-server.cjs',
       env: {
         NODE_ENV: 'production',
         PORT: 3001,
