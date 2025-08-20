@@ -2,7 +2,8 @@ module.exports = {
   apps: [
     {
       name: 'webapp',
-      script: 'working-server.cjs',
+      script: 'node',
+      args: '--loader ./loader.mjs src/index.tsx',
       env: {
         NODE_ENV: 'production',
         PORT: 3001,
