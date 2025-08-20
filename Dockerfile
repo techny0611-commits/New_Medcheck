@@ -10,8 +10,7 @@ WORKDIR /app
 # Copy all project files
 COPY . .
 
-# Install dependencies for the full system
-RUN npm install esbuild hono @supabase/supabase-js mongodb
+# Full system uses Node.js built-ins only
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
