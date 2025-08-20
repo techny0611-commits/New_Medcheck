@@ -1,21 +1,13 @@
 const http = require('http');
-const fs = require('fs');
-const path = require('path');
-
 const PORT = 3001;
 
-// Simple HTML content
-const htmlContent = `
-<!DOCTYPE html>
+const htmlContent = `<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>מערכת ניהול בדיקות</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    </style>
 </head>
 <body class="bg-gray-100 p-8">
     <div class="max-w-4xl mx-auto text-center">
@@ -41,14 +33,16 @@ const htmlContent = `
             
             <div class="mt-8 p-4 bg-yellow-50 rounded-lg">
                 <p class="text-yellow-800">🚀 המערכת מוכנה לשימוש עם MongoDB ו-Redis</p>
+                <p class="text-sm text-gray-600 mt-2">Port: 3001 | Status: Running</p>
             </div>
         </div>
     </div>
 </body>
-</html>
-`;
+</html>`;
 
 const server = http.createServer((req, res) => {
+    console.log(`Request: ${req.method} ${req.url}`);
+    
     // Health check
     if (req.url === '/api/health') {
         res.writeHead(200, { 'Content-Type': 'application/json' });

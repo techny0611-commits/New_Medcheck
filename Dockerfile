@@ -1,4 +1,4 @@
-# Simple Dockerfile for Health Testing System
+# Ultra Simple Dockerfile
 FROM node:20-alpine
 
 # Install PM2 and curl
@@ -7,16 +7,9 @@ RUN npm install -g pm2 && apk add --no-cache curl
 # Set working directory
 WORKDIR /app
 
-# Copy everything
-COPY . .
-
-# Simple build - just create dist directory with working files
-RUN mkdir -p dist && \
-    cp -r src/* dist/ 2>/dev/null || true && \
-    cp -r public/* dist/ 2>/dev/null || true
-
-# Install minimal hono
-RUN npm init -y && npm install hono@^4.0.0
+# Copy only what we need
+COPY simple-server.cjs .
+COPY ecosystem.config.cjs .
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
