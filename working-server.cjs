@@ -52,15 +52,19 @@ async function initializeDatabase() {
   }
 }
 
-// Create default admin user if database is empty
+// Create default admin user and sample data if database is empty
 async function createDefaultAdmin() {
   try {
     if (!db) return;
     
     const usersCollection = db.collection('users');
+    const eventsCollection = db.collection('events');
+    const settingsCollection = db.collection('settings');
+    
     const userCount = await usersCollection.countDocuments();
     
     if (userCount === 0) {
+      // Create default admin
       const defaultAdmin = {
         _id: new ObjectId(),
         email: 'admin@health.system',
@@ -73,9 +77,156 @@ async function createDefaultAdmin() {
       
       await usersCollection.insertOne(defaultAdmin);
       console.log('👤 Default admin user created');
+      
+      // Create sample testers
+      const testers = [
+        {
+          _id: new ObjectId(),
+          email: 'tester1@health.system',
+          name: 'בודק ראשון',
+          password: hashPassword('tester123'),
+          role: 'tester',
+          createdAt: new Date(),
+          isActive: true
+        },
+        {
+          _id: new ObjectId(),
+          email: 'tester2@health.system',
+          name: 'בודק שני',
+          password: hashPassword('tester123'),
+          role: 'tester',
+          createdAt: new Date(),
+          isActive: true
+        }
+      ];
+      
+      await usersCollection.insertMany(testers);
+      console.log('👥 Sample testers created');
+      
+      // Create sample events
+      const sampleEvents = [
+        {
+          _id: new ObjectId(),
+          eventName: 'בדיקות בריאות - חברת ABC',
+          eventDate: new Date(),
+          location: 'תל אביב, רחוב דיזנגוף 123',
+          description: 'בדיקות בריאות שנתיות לעובדי החברה',
+          status: 'completed',
+          maxCapacity: 50,
+          testDuration: 30,
+          breakBetweenTests: 5,
+          dailyBreaks: [
+            { startTime: '10:00', endTime: '10:15', description: 'הפסקת בוקר' },
+            { startTime: '13:00', endTime: '14:00', description: 'הפסקת צהריים' }
+          ],
+          questions: [
+            { question: 'האם אתה צם 12 שעות?', type: 'boolean', required: true },
+            { question: 'האם יש לך אלרגיות ידועות?', type: 'text', required: false }
+          ],
+          registrationDesign: {
+            primaryColor: '#4F46E5',
+            backgroundColor: '#F8FAFC',
+            headerText: 'רישום לבדיקות בריאות',
+            logoUrl: ''
+          },
+          totalRegistered: 45,
+          totalTested: 42,
+          totalRevenue: 12600,
+          createdAt: new Date(Date.now() - 7*86400000)
+        },
+        {
+          _id: new ObjectId(),
+          eventName: 'יום בדיקות - משרדי ממשלה',
+          eventDate: new Date(Date.now() + 86400000),
+          location: 'ירושלים, קריית הממשלה',
+          description: 'בדיקות בריאות לעובדי משרדי הממשלה',
+          status: 'planned',
+          maxCapacity: 40,
+          testDuration: 25,
+          breakBetweenTests: 5,
+          dailyBreaks: [
+            { startTime: '11:00', endTime: '11:15', description: 'הפסקה' },
+            { startTime: '13:30', endTime: '14:30', description: 'צהריים' }
+          ],
+          questions: [
+            { question: 'מספר זהות', type: 'text', required: true },
+            { question: 'מספר טלפון', type: 'phone', required: true }
+          ],
+          registrationDesign: {
+            primaryColor: '#059669',
+            backgroundColor: '#ECFDF5',
+            headerText: 'רישום לבדיקות - משרדי ממשלה',
+            logoUrl: ''
+          },
+          totalRegistered: 38,
+          totalTested: 0,
+          totalRevenue: 0,
+          createdAt: new Date(Date.now() - 3*86400000)
+        },
+        {
+          _id: new ObjectId(),
+          eventName: 'בדיקות בכירים - חברת XYZ',
+          eventDate: new Date(Date.now() - 2*86400000),
+          location: 'חיפה, אזור התעשייה',
+          description: 'בדיקות מקיפות לבכירי החברה',
+          status: 'completed',
+          maxCapacity: 30,
+          testDuration: 45,
+          breakBetweenTests: 10,
+          dailyBreaks: [
+            { startTime: '10:30', endTime: '10:45', description: 'קפה' },
+            { startTime: '12:30', endTime: '13:30', description: 'ארוחת צהריים' }
+          ],
+          questions: [
+            { question: 'האם אתה צם?', type: 'boolean', required: true },
+            { question: 'תרופות שאתה נוטל', type: 'text', required: false },
+            { question: 'בעיות בריאות ידועות', type: 'text', required: false }
+          ],
+          registrationDesign: {
+            primaryColor: '#DC2626',
+            backgroundColor: '#FEF2F2',
+            headerText: 'רישום לבדיקות בכירים',
+            logoUrl: ''
+          },
+          totalRegistered: 25,
+          totalTested: 25,
+          totalRevenue: 18750,
+          createdAt: new Date(Date.now() - 10*86400000)
+        }
+      ];
+      
+      await eventsCollection.insertMany(sampleEvents);
+      console.log('📅 Sample events created');
+      
+      // Create default system settings
+      const defaultSettings = {
+        _id: new ObjectId(),
+        systemName: 'מערכת ניהול בדיקות בריאות',
+        companyName: 'חברת הבדיקות הרפואיות',
+        supportEmail: 'support@health.system',
+        supportPhone: '03-1234567',
+        emailSettings: {
+          smtpHost: '',
+          smtpPort: 587,
+          smtpUser: '',
+          smtpPassword: '',
+          fromEmail: '',
+          fromName: ''
+        },
+        notificationSettings: {
+          sendConfirmationEmails: true,
+          sendReminderEmails: true,
+          reminderHoursBefore: 24
+        },
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      await settingsCollection.insertOne(defaultSettings);
+      console.log('⚙️ Default system settings created');
     }
   } catch (error) {
-    console.error('Error creating default admin:', error);
+    console.error('Error creating default data:', error);
   }
 }
 
@@ -621,6 +772,95 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // ==================== SYSTEM SETTINGS ENDPOINTS ====================
+  
+  // Get system settings
+  if (pathname === '/api/system/settings' && method === 'GET') {
+    try {
+      const userInfo = await requireAuth(req, res, corsHeaders);
+      if (!userInfo) return;
+      
+      if (!(await requireAdmin(userInfo, res, corsHeaders))) return;
+
+      if (!db) {
+        res.writeHead(500, corsHeaders);
+        res.end(JSON.stringify({
+          success: false,
+          error: 'שגיאה בחיבור למסד הנתונים'
+        }));
+        return;
+      }
+
+      const settingsCollection = db.collection('settings');
+      const settings = await settingsCollection.findOne({});
+      
+      res.writeHead(200, corsHeaders);
+      res.end(JSON.stringify({
+        success: true,
+        data: settings || {}
+      }));
+      
+    } catch (error) {
+      console.error('Settings fetch error:', error);
+      res.writeHead(500, corsHeaders);
+      res.end(JSON.stringify({
+        success: false,
+        error: 'שגיאה פנימית בשרת'
+      }));
+    }
+    return;
+  }
+
+  // Save system settings
+  if (pathname === '/api/system/settings' && method === 'POST') {
+    try {
+      const userInfo = await requireAuth(req, res, corsHeaders);
+      if (!userInfo) return;
+      
+      if (!(await requireAdmin(userInfo, res, corsHeaders))) return;
+
+      const settingsData = await parseBody(req);
+
+      if (!db) {
+        res.writeHead(500, corsHeaders);
+        res.end(JSON.stringify({
+          success: false,
+          error: 'שגיאה בחיבור למסד הנתונים'
+        }));
+        return;
+      }
+
+      const settingsCollection = db.collection('settings');
+      
+      // Update or create settings
+      const updateData = {
+        ...settingsData,
+        updatedAt: new Date()
+      };
+      
+      await settingsCollection.updateOne(
+        {},
+        { $set: updateData },
+        { upsert: true }
+      );
+      
+      res.writeHead(200, corsHeaders);
+      res.end(JSON.stringify({
+        success: true,
+        message: 'הגדרות נשמרו בהצלחה'
+      }));
+      
+    } catch (error) {
+      console.error('Settings save error:', error);
+      res.writeHead(500, corsHeaders);
+      res.end(JSON.stringify({
+        success: false,
+        error: 'שגיאה בשמירת ההגדרות'
+      }));
+    }
+    return;
+  }
+
   // ==================== EVENTS ENDPOINTS ====================
   
   // Get dashboard data
@@ -730,6 +970,212 @@ const server = http.createServer(async (req, res) => {
       res.end(JSON.stringify({
         success: false,
         error: 'שגיאה פנימית בשרת'
+      }));
+    }
+    return;
+  }
+
+  // Create new event
+  if (pathname === '/api/events' && method === 'POST') {
+    try {
+      const userInfo = await requireAuth(req, res, corsHeaders);
+      if (!userInfo) return;
+      
+      if (!(await requireAdmin(userInfo, res, corsHeaders))) return;
+
+      const eventData = await parseBody(req);
+      
+      // Validate required fields
+      if (!eventData.eventName || !eventData.eventDate || !eventData.location) {
+        res.writeHead(400, corsHeaders);
+        res.end(JSON.stringify({
+          success: false,
+          error: 'נדרש שם אירוע, תאריך ומיקום'
+        }));
+        return;
+      }
+
+      if (!db) {
+        res.writeHead(500, corsHeaders);
+        res.end(JSON.stringify({
+          success: false,
+          error: 'שגיאה בחיבור למסד הנתונים'
+        }));
+        return;
+      }
+
+      const eventsCollection = db.collection('events');
+      
+      const newEvent = {
+        _id: new ObjectId(),
+        eventName: eventData.eventName,
+        eventDate: new Date(eventData.eventDate),
+        location: eventData.location,
+        description: eventData.description || '',
+        status: 'preparing',
+        maxCapacity: parseInt(eventData.maxCapacity) || 50,
+        testDuration: parseInt(eventData.testDuration) || 30,
+        breakBetweenTests: parseInt(eventData.breakBetweenTests) || 5,
+        dailyBreaks: eventData.dailyBreaks || [],
+        questions: eventData.questions || [],
+        registrationDesign: eventData.registrationDesign || {
+          primaryColor: '#4F46E5',
+          backgroundColor: '#F8FAFC',
+          headerText: 'רישום לבדיקות בריאות',
+          logoUrl: ''
+        },
+        totalRegistered: 0,
+        totalTested: 0,
+        totalRevenue: 0,
+        createdAt: new Date(),
+        createdBy: userInfo.userId
+      };
+
+      await eventsCollection.insertOne(newEvent);
+      
+      res.writeHead(201, corsHeaders);
+      res.end(JSON.stringify({
+        success: true,
+        data: newEvent,
+        message: 'אירוע נוצר בהצלחה'
+      }));
+      
+    } catch (error) {
+      console.error('Event creation error:', error);
+      res.writeHead(500, corsHeaders);
+      res.end(JSON.stringify({
+        success: false,
+        error: 'שגיאה ביצירת האירוע'
+      }));
+    }
+    return;
+  }
+
+  // Update event
+  if (pathname.startsWith('/api/events/') && method === 'PUT') {
+    try {
+      const userInfo = await requireAuth(req, res, corsHeaders);
+      if (!userInfo) return;
+      
+      if (!(await requireAdmin(userInfo, res, corsHeaders))) return;
+
+      const eventId = pathname.split('/')[3];
+      const updates = await parseBody(req);
+      
+      if (!ObjectId.isValid(eventId)) {
+        res.writeHead(400, corsHeaders);
+        res.end(JSON.stringify({
+          success: false,
+          error: 'מזהה אירוע לא תקין'
+        }));
+        return;
+      }
+
+      if (!db) {
+        res.writeHead(500, corsHeaders);
+        res.end(JSON.stringify({
+          success: false,
+          error: 'שגיאה בחיבור למסד הנתונים'
+        }));
+        return;
+      }
+
+      const eventsCollection = db.collection('events');
+      
+      const updateData = {
+        ...updates,
+        updatedAt: new Date()
+      };
+      
+      if (updateData.eventDate) {
+        updateData.eventDate = new Date(updateData.eventDate);
+      }
+      
+      const result = await eventsCollection.updateOne(
+        { _id: new ObjectId(eventId) },
+        { $set: updateData }
+      );
+      
+      if (result.matchedCount === 0) {
+        res.writeHead(404, corsHeaders);
+        res.end(JSON.stringify({
+          success: false,
+          error: 'אירוע לא נמצא'
+        }));
+        return;
+      }
+
+      res.writeHead(200, corsHeaders);
+      res.end(JSON.stringify({
+        success: true,
+        message: 'אירוע עודכן בהצלחה'
+      }));
+      
+    } catch (error) {
+      console.error('Event update error:', error);
+      res.writeHead(500, corsHeaders);
+      res.end(JSON.stringify({
+        success: false,
+        error: 'שגיאה בעדכון האירוע'
+      }));
+    }
+    return;
+  }
+
+  // Delete event
+  if (pathname.startsWith('/api/events/') && method === 'DELETE') {
+    try {
+      const userInfo = await requireAuth(req, res, corsHeaders);
+      if (!userInfo) return;
+      
+      if (!(await requireAdmin(userInfo, res, corsHeaders))) return;
+
+      const eventId = pathname.split('/')[3];
+      
+      if (!ObjectId.isValid(eventId)) {
+        res.writeHead(400, corsHeaders);
+        res.end(JSON.stringify({
+          success: false,
+          error: 'מזהה אירוע לא תקין'
+        }));
+        return;
+      }
+
+      if (!db) {
+        res.writeHead(500, corsHeaders);
+        res.end(JSON.stringify({
+          success: false,
+          error: 'שגיאה בחיבור למסד הנתונים'
+        }));
+        return;
+      }
+
+      const eventsCollection = db.collection('events');
+      const result = await eventsCollection.deleteOne({ 
+        _id: new ObjectId(eventId) 
+      });
+      
+      if (result.deletedCount === 0) {
+        res.writeHead(404, corsHeaders);
+        res.end(JSON.stringify({
+          success: false,
+          error: 'אירוע לא נמצא'
+        }));
+        return;
+      }
+
+      res.writeHead(200, corsHeaders);
+      res.end(JSON.stringify({
+        success: true,
+        message: 'אירוע נמחק בהצלחה'
+      }));
+      
+    } catch (error) {
+      console.error('Event deletion error:', error);
+      res.writeHead(500, corsHeaders);
+      res.end(JSON.stringify({
+        success: false,
+        error: 'שגיאה במחיקת האירוע'
       }));
     }
     return;
