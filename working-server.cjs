@@ -5,7 +5,7 @@ const url = require('url');
 const { MongoClient, ObjectId } = require('mongodb');
 const crypto = require('crypto');
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 // MongoDB configuration - will work with Docker or external MongoDB
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://admin:password123@localhost:27017/webapp?authSource=admin';
@@ -16,7 +16,10 @@ let client = null;
 async function connectDB() {
   if (!db) {
     try {
-      client = new MongoClient(MONGO_URI);
+      client = new MongoClient(MONGO_URI, {
+        serverSelectionTimeoutMS: 5000, // 5 seconds timeout
+        connectTimeoutMS: 5000
+      });
       await client.connect();
       db = client.db();
       console.log('✅ Connected to MongoDB successfully');
@@ -1566,19 +1569,21 @@ process.on('SIGINT', async () => {
 });
 
 // Start server
+server.listen(PORT, '0.0.0.0', () => {
+  console.log('🚀 Health Testing and Sales Management System');
+  console.log(`📱 Server running on port ${PORT}`);
+  console.log(`🌐 Access at: http://localhost:${PORT}`);
+  console.log('');
+});
+
+// Connect to database in background (non-blocking)
 connectDB().then(() => {
-  server.listen(PORT, '0.0.0.0', () => {
-    console.log('🚀 Health Testing and Sales Management System');
-    console.log(`📱 Server running on port ${PORT}`);
-    console.log(`🌐 Access at: http://localhost:${PORT}`);
-    console.log('');
-    if (db) {
-      console.log('✅ Database: Connected');
-    } else {
-      console.log('❌ Database: Disconnected - some features may not work');
-    }
-  });
+  if (db) {
+    console.log('✅ Database: Connected');
+  } else {
+    console.log('❌ Database: Disconnected - some features may not work');
+  }
 }).catch(error => {
-  console.error('❌ Failed to start server:', error);
-  process.exit(1);
+  console.error('❌ Database connection failed:', error);
+  console.log('❌ Database: Disconnected - some features may not work');
 });

@@ -886,7 +886,7 @@ const EmployeesList = ({ employees, type, availableSlots, onSchedule, onUnschedu
       key: 'schedule-modal',
       className: 'fixed inset-0 z-50 flex items-center justify-center modal-backdrop'
     }, React.createElement('div', {
-      className: 'bg-white rounded-lg shadow-2xl max-w-md w-full mx-4'
+      className: 'bg-white rounded-lg shadow-2xl max-w-xs sm:max-w-md w-full mx-2 sm:mx-4'
     }, [
       React.createElement('div', {
         key: 'modal-header',
@@ -1007,7 +1007,7 @@ const TestResultsModal = ({ isOpen, employee, onClose, onSuccess }) => {
   return React.createElement('div', {
     className: 'fixed inset-0 z-50 flex items-center justify-center modal-backdrop'
   }, React.createElement('div', {
-    className: 'bg-white rounded-lg shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto'
+    className: 'bg-white rounded-lg shadow-2xl max-w-xs sm:max-w-md md:max-w-2xl w-full mx-2 sm:mx-4 max-h-[90vh] overflow-y-auto'
   }, [
     React.createElement('div', {
       key: 'header',
@@ -1778,7 +1778,7 @@ const EventFormModal = ({ isOpen, onClose, eventData = null, onSuccess }) => {
   return React.createElement('div', {
     className: 'fixed inset-0 z-50 flex items-center justify-center modal-backdrop'
   }, React.createElement('div', {
-    className: 'bg-white rounded-lg shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto'
+    className: 'bg-white rounded-lg shadow-2xl max-w-xs sm:max-w-md md:max-w-2xl lg:max-w-4xl w-full mx-2 sm:mx-4 max-h-[90vh] overflow-y-auto'
   }, [
     // Modal Header
     React.createElement('div', {
@@ -1800,6 +1800,7 @@ const EventFormModal = ({ isOpen, onClose, eventData = null, onSuccess }) => {
     // Modal Body
     React.createElement('form', {
       key: 'form',
+      id: 'event-form',
       onSubmit: handleSubmit,
       className: 'p-6 space-y-6'
     }, [
@@ -1962,6 +1963,413 @@ const EventFormModal = ({ isOpen, onClose, eventData = null, onSuccess }) => {
           rows: 4,
           placeholder: 'הודעה שתוצג לעובדים בדף הרישום'
         })
+      ]),
+
+      // Custom Breaks Schedule
+      React.createElement('div', {
+        key: 'custom-breaks-section',
+        className: 'space-y-4'
+      }, [
+        React.createElement('div', {
+          key: 'breaks-header',
+          className: 'flex items-center justify-between'
+        }, [
+          React.createElement('h3', {
+            key: 'title',
+            className: 'text-lg font-medium text-gray-900'
+          }, 'הגדרת הפסקות במהלך היום'),
+          React.createElement('button', {
+            key: 'add-break',
+            type: 'button',
+            onClick: () => {
+              const newBreak = {
+                id: Date.now(),
+                startTime: '12:00',
+                endTime: '12:30',
+                description: 'הפסקת צהריים'
+              };
+              setFormData(prev => ({
+                ...prev,
+                customBreaks: [...prev.customBreaks, newBreak]
+              }));
+            },
+            className: 'btn-secondary px-3 py-1 text-sm rounded-lg flex items-center space-x-2'
+          }, [
+            React.createElement(Icon, { key: 'icon', name: 'plus', className: 'w-4 h-4' }),
+            React.createElement('span', { key: 'text' }, 'הוסף הפסקה')
+          ])
+        ]),
+        React.createElement('div', {
+          key: 'breaks-list',
+          className: 'space-y-3'
+        }, formData.customBreaks.map(breakItem => 
+          React.createElement('div', {
+            key: breakItem.id,
+            className: 'grid grid-cols-5 gap-4 items-center bg-gray-50 p-4 rounded-lg'
+          }, [
+            React.createElement('div', { key: 'start-time' }, [
+              React.createElement('label', {
+                className: 'block text-xs font-medium text-gray-600 mb-1'
+              }, 'שעת התחלה'),
+              React.createElement('input', {
+                type: 'time',
+                value: breakItem.startTime,
+                onChange: (e) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    customBreaks: prev.customBreaks.map(b => 
+                      b.id === breakItem.id ? { ...b, startTime: e.target.value } : b
+                    )
+                  }));
+                },
+                className: 'form-input w-full px-2 py-1 text-sm rounded'
+              })
+            ]),
+            React.createElement('div', { key: 'end-time' }, [
+              React.createElement('label', {
+                className: 'block text-xs font-medium text-gray-600 mb-1'
+              }, 'שעת סיום'),
+              React.createElement('input', {
+                type: 'time',
+                value: breakItem.endTime,
+                onChange: (e) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    customBreaks: prev.customBreaks.map(b => 
+                      b.id === breakItem.id ? { ...b, endTime: e.target.value } : b
+                    )
+                  }));
+                },
+                className: 'form-input w-full px-2 py-1 text-sm rounded'
+              })
+            ]),
+            React.createElement('div', {
+              key: 'description',
+              className: 'col-span-2'
+            }, [
+              React.createElement('label', {
+                className: 'block text-xs font-medium text-gray-600 mb-1'
+              }, 'תיאור ההפסקה'),
+              React.createElement('input', {
+                type: 'text',
+                value: breakItem.description,
+                onChange: (e) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    customBreaks: prev.customBreaks.map(b => 
+                      b.id === breakItem.id ? { ...b, description: e.target.value } : b
+                    )
+                  }));
+                },
+                className: 'form-input w-full px-2 py-1 text-sm rounded',
+                placeholder: 'למשל: הפסקת צהריים'
+              })
+            ]),
+            React.createElement('div', {
+              key: 'actions',
+              className: 'flex justify-end'
+            }, React.createElement('button', {
+              type: 'button',
+              onClick: () => {
+                setFormData(prev => ({
+                  ...prev,
+                  customBreaks: prev.customBreaks.filter(b => b.id !== breakItem.id)
+                }));
+              },
+              className: 'p-1 hover:bg-red-100 text-red-600 rounded'
+            }, React.createElement(Icon, { name: 'trash', className: 'w-4 h-4' })))
+          ])
+        ))
+      ]),
+
+      // Participant Questions Section
+      React.createElement('div', {
+        key: 'questions-section',
+        className: 'space-y-4'
+      }, [
+        React.createElement('div', {
+          key: 'questions-header',
+          className: 'flex items-center justify-between'
+        }, [
+          React.createElement('h3', {
+            key: 'title',
+            className: 'text-lg font-medium text-gray-900'
+          }, 'שאלות מותאמות אישית לנבדקים'),
+          React.createElement('button', {
+            key: 'add-question',
+            type: 'button',
+            onClick: () => {
+              const newQuestion = {
+                id: Date.now(),
+                question: '',
+                type: 'text',
+                required: false,
+                options: []
+              };
+              setFormData(prev => ({
+                ...prev,
+                relevantIssues: [...prev.relevantIssues, newQuestion]
+              }));
+            },
+            className: 'btn-secondary px-3 py-1 text-sm rounded-lg flex items-center space-x-2'
+          }, [
+            React.createElement(Icon, { key: 'icon', name: 'plus', className: 'w-4 h-4' }),
+            React.createElement('span', { key: 'text' }, 'הוסף שאלה')
+          ])
+        ]),
+        React.createElement('div', {
+          key: 'questions-list',
+          className: 'space-y-4'
+        }, formData.relevantIssues.map((question, index) => 
+          React.createElement('div', {
+            key: question.id,
+            className: 'bg-gray-50 p-4 rounded-lg space-y-3'
+          }, [
+            React.createElement('div', {
+              key: 'question-header',
+              className: 'flex items-center justify-between'
+            }, [
+              React.createElement('span', {
+                className: 'font-medium text-gray-700'
+              }, `שאלה ${index + 1}`),
+              React.createElement('button', {
+                type: 'button',
+                onClick: () => {
+                  setFormData(prev => ({
+                    ...prev,
+                    relevantIssues: prev.relevantIssues.filter(q => q.id !== question.id)
+                  }));
+                },
+                className: 'p-1 hover:bg-red-100 text-red-600 rounded'
+              }, React.createElement(Icon, { name: 'trash', className: 'w-4 h-4' }))
+            ]),
+            React.createElement('div', {
+              key: 'question-content',
+              className: 'grid grid-cols-1 md:grid-cols-3 gap-4'
+            }, [
+              React.createElement('div', {
+                key: 'question-text',
+                className: 'md:col-span-2'
+              }, [
+                React.createElement('label', {
+                  className: 'block text-xs font-medium text-gray-600 mb-1'
+                }, 'טקסט השאלה'),
+                React.createElement('input', {
+                  type: 'text',
+                  value: question.question,
+                  onChange: (e) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      relevantIssues: prev.relevantIssues.map(q => 
+                        q.id === question.id ? { ...q, question: e.target.value } : q
+                      )
+                    }));
+                  },
+                  className: 'form-input w-full px-2 py-1 text-sm rounded',
+                  placeholder: 'הזן את השאלה כאן...'
+                })
+              ]),
+              React.createElement('div', {
+                key: 'question-type'
+              }, [
+                React.createElement('label', {
+                  className: 'block text-xs font-medium text-gray-600 mb-1'
+                }, 'סוג השאלה'),
+                React.createElement('select', {
+                  value: question.type,
+                  onChange: (e) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      relevantIssues: prev.relevantIssues.map(q => 
+                        q.id === question.id ? { ...q, type: e.target.value } : q
+                      )
+                    }));
+                  },
+                  className: 'form-input w-full px-2 py-1 text-sm rounded'
+                }, [
+                  React.createElement('option', { key: 'text', value: 'text' }, 'טקסט חופשי'),
+                  React.createElement('option', { key: 'select', value: 'select' }, 'בחירה מרשימה'),
+                  React.createElement('option', { key: 'checkbox', value: 'checkbox' }, 'תיבות סימון'),
+                  React.createElement('option', { key: 'radio', value: 'radio' }, 'בחירה יחידה')
+                ])
+              ])
+            ]),
+            React.createElement('div', {
+              key: 'question-required',
+              className: 'flex items-center'
+            }, [
+              React.createElement('input', {
+                type: 'checkbox',
+                checked: question.required,
+                onChange: (e) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    relevantIssues: prev.relevantIssues.map(q => 
+                      q.id === question.id ? { ...q, required: e.target.checked } : q
+                    )
+                  }));
+                },
+                className: 'rounded border-gray-300 text-pastel-mint focus:ring-pastel-mint mr-2'
+              }),
+              React.createElement('span', {
+                className: 'text-sm text-gray-700'
+              }, 'שאלה חובה')
+            ])
+          ])
+        ))
+      ]),
+
+      // Registration Page Design
+      React.createElement('div', {
+        key: 'design-section',
+        className: 'space-y-4'
+      }, [
+        React.createElement('h3', {
+          key: 'title',
+          className: 'text-lg font-medium text-gray-900'
+        }, 'עיצוב דף הרישום'),
+        React.createElement('div', {
+          key: 'design-content',
+          className: 'grid grid-cols-1 md:grid-cols-2 gap-6'
+        }, [
+          // Color Palette
+          React.createElement('div', {
+            key: 'colors',
+            className: 'space-y-4'
+          }, [
+            React.createElement('h4', {
+              className: 'font-medium text-gray-800 mb-3'
+            }, 'ערכת צבעים'),
+            React.createElement('div', {
+              className: 'space-y-3'
+            }, [
+              React.createElement('div', {
+                key: 'primary-color',
+                className: 'flex items-center space-x-3'
+              }, [
+                React.createElement('label', {
+                  className: 'text-sm font-medium text-gray-700 w-20'
+                }, 'צבע ראשי:'),
+                React.createElement('input', {
+                  type: 'color',
+                  value: formData.colorPalette.primary,
+                  onChange: (e) => setFormData(prev => ({
+                    ...prev,
+                    colorPalette: { ...prev.colorPalette, primary: e.target.value }
+                  })),
+                  className: 'w-12 h-8 rounded border border-gray-300'
+                }),
+                React.createElement('input', {
+                  type: 'text',
+                  value: formData.colorPalette.primary,
+                  onChange: (e) => setFormData(prev => ({
+                    ...prev,
+                    colorPalette: { ...prev.colorPalette, primary: e.target.value }
+                  })),
+                  className: 'form-input flex-1 px-2 py-1 text-sm rounded',
+                  placeholder: '#a3e4d7'
+                })
+              ]),
+              React.createElement('div', {
+                key: 'secondary-color',
+                className: 'flex items-center space-x-3'
+              }, [
+                React.createElement('label', {
+                  className: 'text-sm font-medium text-gray-700 w-20'
+                }, 'צבע משני:'),
+                React.createElement('input', {
+                  type: 'color',
+                  value: formData.colorPalette.secondary,
+                  onChange: (e) => setFormData(prev => ({
+                    ...prev,
+                    colorPalette: { ...prev.colorPalette, secondary: e.target.value }
+                  })),
+                  className: 'w-12 h-8 rounded border border-gray-300'
+                }),
+                React.createElement('input', {
+                  type: 'text',
+                  value: formData.colorPalette.secondary,
+                  onChange: (e) => setFormData(prev => ({
+                    ...prev,
+                    colorPalette: { ...prev.colorPalette, secondary: e.target.value }
+                  })),
+                  className: 'form-input flex-1 px-2 py-1 text-sm rounded',
+                  placeholder: '#fbb6ce'
+                })
+              ]),
+              React.createElement('div', {
+                key: 'accent-color',
+                className: 'flex items-center space-x-3'
+              }, [
+                React.createElement('label', {
+                  className: 'text-sm font-medium text-gray-700 w-20'
+                }, 'צבע הדגשה:'),
+                React.createElement('input', {
+                  type: 'color',
+                  value: formData.colorPalette.accent,
+                  onChange: (e) => setFormData(prev => ({
+                    ...prev,
+                    colorPalette: { ...prev.colorPalette, accent: e.target.value }
+                  })),
+                  className: 'w-12 h-8 rounded border border-gray-300'
+                }),
+                React.createElement('input', {
+                  type: 'text',
+                  value: formData.colorPalette.accent,
+                  onChange: (e) => setFormData(prev => ({
+                    ...prev,
+                    colorPalette: { ...prev.colorPalette, accent: e.target.value }
+                  })),
+                  className: 'form-input flex-1 px-2 py-1 text-sm rounded',
+                  placeholder: '#a78bfa'
+                })
+              ])
+            ])
+          ]),
+          // Banner and Icon
+          React.createElement('div', {
+            key: 'banner-icon',
+            className: 'space-y-4'
+          }, [
+            React.createElement('div', {
+              key: 'banner'
+            }, [
+              React.createElement('label', {
+                className: 'block text-sm font-medium text-gray-700 mb-2'
+              }, 'תמונת באנר (URL)'),
+              React.createElement('input', {
+                type: 'url',
+                value: formData.bannerImage,
+                onChange: (e) => setFormData(prev => ({ ...prev, bannerImage: e.target.value })),
+                className: 'form-input w-full px-3 py-2 rounded-lg',
+                placeholder: 'https://example.com/banner.jpg'
+              }),
+              React.createElement('p', {
+                className: 'text-xs text-gray-500 mt-1'
+              }, 'תמונה שתוצג בחלק העליון של דף הרישום')
+            ]),
+            React.createElement('div', {
+              key: 'icon'
+            }, [
+              React.createElement('label', {
+                className: 'block text-sm font-medium text-gray-700 mb-2'
+              }, 'אייקון'),
+              React.createElement('select', {
+                value: formData.iconName,
+                onChange: (e) => setFormData(prev => ({ ...prev, iconName: e.target.value })),
+                className: 'form-input w-full px-3 py-2 rounded-lg'
+              }, [
+                React.createElement('option', { key: 'heart', value: 'heart' }, '❤️ לב'),
+                React.createElement('option', { key: 'building-office', value: 'building-office' }, '🏢 בניין'),
+                React.createElement('option', { key: 'users', value: 'users' }, '👥 אנשים'),
+                React.createElement('option', { key: 'calendar-days', value: 'calendar-days' }, '📅 לוח שנה'),
+                React.createElement('option', { key: 'chart-bar', value: 'chart-bar' }, '📊 גרף'),
+                React.createElement('option', { key: 'check-circle', value: 'check-circle' }, '✅ וי'),
+                React.createElement('option', { key: 'cog-6-tooth', value: 'cog-6-tooth' }, '⚙️ הגדרות')
+              ])
+            ])
+          ])
+        ])
       ])
     ]),
 
@@ -3593,127 +4001,9 @@ const SystemSettingsTab = ({ settings, setSettings }) => {
     className: 'space-y-6'
   }, [
     React.createElement('div', {
-      key: 'timing',
-      className: 'grid grid-cols-1 md:grid-cols-3 gap-6'
-    }, [
-      React.createElement('div', {
-        key: 'test-duration'
-      }, [
-        React.createElement('label', {
-          className: 'block text-sm font-medium text-gray-700 mb-2'
-        }, 'משך בדיקה ברירת מחדל (דקות)'),
-        React.createElement('input', {
-          type: 'number',
-          min: 5,
-          max: 120,
-          value: settings.systemSettings.defaultTestDuration,
-          onChange: (e) => setSettings(prev => ({
-            ...prev,
-            systemSettings: { ...prev.systemSettings, defaultTestDuration: parseInt(e.target.value) }
-          })),
-          className: 'form-input w-full px-3 py-2 rounded-lg'
-        })
-      ]),
-
-      React.createElement('div', {
-        key: 'break-duration'
-      }, [
-        React.createElement('label', {
-          className: 'block text-sm font-medium text-gray-700 mb-2'
-        }, 'הפסקה בין בדיקות (דקות)'),
-        React.createElement('input', {
-          type: 'number',
-          min: 0,
-          max: 60,
-          value: settings.systemSettings.defaultBreakDuration,
-          onChange: (e) => setSettings(prev => ({
-            ...prev,
-            systemSettings: { ...prev.systemSettings, defaultBreakDuration: parseInt(e.target.value) }
-          })),
-          className: 'form-input w-full px-3 py-2 rounded-lg'
-        })
-      ]),
-
-      React.createElement('div', {
-        key: 'max-participants'
-      }, [
-        React.createElement('label', {
-          className: 'block text-sm font-medium text-gray-700 mb-2'
-        }, 'מקסימום משתתפים לאירוע'),
-        React.createElement('input', {
-          type: 'number',
-          min: 10,
-          max: 2000,
-          value: settings.systemSettings.maxParticipantsPerEvent,
-          onChange: (e) => setSettings(prev => ({
-            ...prev,
-            systemSettings: { ...prev.systemSettings, maxParticipantsPerEvent: parseInt(e.target.value) }
-          })),
-          className: 'form-input w-full px-3 py-2 rounded-lg'
-        })
-      ])
-    ]),
-
-    React.createElement('div', {
-      key: 'booking-settings',
-      className: 'space-y-4'
-    }, [
-      React.createElement('div', {
-        key: 'advance-booking'
-      }, [
-        React.createElement('label', {
-          className: 'block text-sm font-medium text-gray-700 mb-2'
-        }, 'מקסימום ימים לרישום מראש'),
-        React.createElement('input', {
-          type: 'number',
-          min: 1,
-          max: 365,
-          value: settings.systemSettings.advanceBookingDays,
-          onChange: (e) => setSettings(prev => ({
-            ...prev,
-            systemSettings: { ...prev.systemSettings, advanceBookingDays: parseInt(e.target.value) }
-          })),
-          className: 'form-input w-full max-w-xs px-3 py-2 rounded-lg'
-        })
-      ]),
-
-      React.createElement('div', {
-        key: 'checkboxes',
-        className: 'space-y-3'
-      }, [
-        React.createElement('label', {
-          key: 'walk-ins',
-          className: 'flex items-center'
-        }, [
-          React.createElement('input', {
-            type: 'checkbox',
-            checked: settings.systemSettings.allowWalkIns,
-            onChange: (e) => setSettings(prev => ({
-              ...prev,
-              systemSettings: { ...prev.systemSettings, allowWalkIns: e.target.checked }
-            })),
-            className: 'rounded border-gray-300 text-pastel-mint focus:ring-pastel-mint mr-2'
-          }),
-          React.createElement('span', { className: 'text-sm text-gray-700' }, 'אפשר כניסה ללא תיאום מראש')
-        ]),
-
-        React.createElement('label', {
-          key: 'phone-validation',
-          className: 'flex items-center'
-        }, [
-          React.createElement('input', {
-            type: 'checkbox',
-            checked: settings.systemSettings.requirePhoneValidation,
-            onChange: (e) => setSettings(prev => ({
-              ...prev,
-              systemSettings: { ...prev.systemSettings, requirePhoneValidation: e.target.checked }
-            })),
-            className: 'rounded border-gray-300 text-pastel-mint focus:ring-pastel-mint mr-2'
-          }),
-          React.createElement('span', { className: 'text-sm text-gray-700' }, 'דרוש אימות מספר טלפון')
-        ])
-      ])
-    ])
+      key: 'empty-placeholder',
+      className: 'text-center py-8 text-gray-500'
+    }, 'מחכה להגדרות מערכת לפי מסמך הדרישות')
   ]);
 };
 
@@ -3937,6 +4227,7 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, userData = null }) => {
 
     React.createElement('form', {
       key: 'form',
+      id: 'user-form',
       onSubmit: handleSubmit,
       className: 'p-6 space-y-4'
     }, [
