@@ -10,7 +10,8 @@ WORKDIR /app
 # Copy all project files
 COPY . .
 
-# Full system uses Node.js built-ins only
+# Install MongoDB driver
+RUN npm install mongodb
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \

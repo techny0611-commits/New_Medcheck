@@ -1,12 +1,13 @@
 {
   "name": "webapp",
-  "type": "module", 
+  "type": "module",
   "scripts": {
     "build": "echo 'Build completed' && mkdir -p dist && echo 'console.log(\"App ready\")' > dist/_worker.js",
     "dev:sandbox": "echo 'Running on port 3001'",
     "test": "curl http://localhost:3001"
   },
   "dependencies": {
-    "hono": "^4.0.0"
+    "hono": "^4.0.0",
+    "mongodb": "^6.18.0"
   }
 }
