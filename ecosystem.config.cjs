@@ -2,10 +2,14 @@ module.exports = {
   apps: [
     {
       name: 'webapp',
-      script: 'simple-server.cjs',
+      script: 'server.cjs',
       env: {
         NODE_ENV: 'production',
-        PORT: 3001
+        PORT: 3001,
+        MONGODB_URI: process.env.MONGODB_URI || 'mongodb://mongodb:27017/webapp',
+        SUPABASE_URL: process.env.SUPABASE_URL,
+        SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
+        BASE_URL: process.env.BASE_URL || 'http://localhost:3001'
       },
       watch: false,
       instances: 1,

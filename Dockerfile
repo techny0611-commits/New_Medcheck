@@ -1,4 +1,4 @@
-# Ultra Simple Dockerfile
+# Full System Dockerfile
 FROM node:20-alpine
 
 # Install PM2 and curl
@@ -7,9 +7,14 @@ RUN npm install -g pm2 && apk add --no-cache curl
 # Set working directory
 WORKDIR /app
 
-# Copy only what we need
-COPY simple-server.cjs .
-COPY ecosystem.config.cjs .
+# Copy all project files
+COPY . .
+
+# Create simple package.json for the system
+RUN echo '{"type":"commonjs","dependencies":{"hono":"^4.0.0","@hono/node-server":"^1.0.0"}}' > package.json
+
+# Install dependencies
+RUN npm install
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
@@ -24,5 +29,5 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
   CMD curl -f http://localhost:3001/api/health || exit 1
 
-# Run with PM2
+# Run the full system
 CMD ["pm2-runtime", "start", "ecosystem.config.cjs"]
