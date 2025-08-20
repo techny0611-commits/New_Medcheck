@@ -1522,31 +1522,7 @@ const server = http.createServer(async (req, res) => {
             dayjs.locale('he');
         }
         
-        // Initialize React app
-        if (typeof React !== 'undefined' && typeof ReactDOM !== 'undefined') {
-            const root = ReactDOM.createRoot(document.getElementById('root'));
-            if (typeof App !== 'undefined') {
-                root.render(React.createElement(App));
-            } else {
-                root.render(React.createElement('div', {
-                    className: 'flex items-center justify-center min-h-screen'
-                }, [
-                    React.createElement('div', {
-                        key: 'loading',
-                        className: 'text-center'
-                    }, [
-                        React.createElement('div', {
-                            key: 'spinner',
-                            className: 'spinner mx-auto mb-4'
-                        }),
-                        React.createElement('p', {
-                            key: 'text',
-                            className: 'text-gray-600'
-                        }, 'טוען את המערכת...')
-                    ])
-                ]));
-            }
-        }
+        // React app will initialize itself via app.js DOMContentLoaded event
     </script>
 </body>
 </html>`;
