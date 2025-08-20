@@ -10,11 +10,7 @@ WORKDIR /app
 # Copy all project files
 COPY . .
 
-# Create simple package.json for the system
-RUN echo '{"type":"commonjs","dependencies":{"hono":"^4.0.0","@hono/node-server":"^1.0.0"}}' > package.json
-
-# Install dependencies
-RUN npm install
+# No need for package.json - using pure Node.js HTTP
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
