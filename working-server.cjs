@@ -861,7 +861,192 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // ==================== SYSTEM SETTINGS ENDPOINTS ====================
+  
+  // Get system settings
+  if (pathname === '/api/system/settings' && method === 'GET') {
+    try {
+      const userInfo = await requireAuth(req, res, corsHeaders);
+      if (!userInfo) return;
+      
+      if (!(await requireAdmin(userInfo, res, corsHeaders))) return;
+
+      if (!db) {
+        res.writeHead(500, corsHeaders);
+        res.end(JSON.stringify({
+          success: false,
+          error: 'שגיאה בחיבור למסד הנתונים'
+        }));
+        return;
+      }
+
+      const settingsCollection = db.collection('settings');
+      let settings = await settingsCollection.findOne({});
+      
+      if (!settings) {
+        // Create default settings if none exist
+        settings = {
+          systemName: 'מערכת ניהול בדיקות בריאות',
+          companyName: 'חברת הבדיקות הרפואיות',
+          supportEmail: 'support@health.system',
+          supportPhone: '03-1234567',
+          emailSettings: {
+            smtpHost: '',
+            smtpPort: 587,
+            smtpUser: '',
+            smtpPassword: '',
+            fromEmail: '',
+            fromName: ''
+          },
+          notificationSettings: {
+            sendConfirmationEmails: true,
+            sendReminderEmails: true,
+            reminderHoursBefore: 24
+          }
+        };
+        
+        await settingsCollection.insertOne(settings);
+      }
+
+      res.writeHead(200, corsHeaders);
+      res.end(JSON.stringify({
+        success: true,
+        data: settings
+      }));
+      
+    } catch (error) {
+      console.error('Settings fetch error:', error);
+      res.writeHead(500, corsHeaders);
+      res.end(JSON.stringify({
+        success: false,
+        error: 'שגיאה פנימית בשרת'
+      }));
+    }
+    return;
+  }
+
+  // Save system settings
+  if (pathname === '/api/system/settings' && method === 'POST') {
+    try {
+      const userInfo = await requireAuth(req, res, corsHeaders);
+      if (!userInfo) return;
+      
+      if (!(await requireAdmin(userInfo, res, corsHeaders))) return;
+
+      const settingsData = await parseBody(req);
+
+      if (!db) {
+        res.writeHead(500, corsHeaders);
+        res.end(JSON.stringify({
+          success: false,
+          error: 'שגיאה בחיבור למסד הנתונים'
+        }));
+        return;
+      }
+
+      const settingsCollection = db.collection('settings');
+      
+      // Update or create settings
+      const result = await settingsCollection.replaceOne(
+        {},
+        { ...settingsData, updatedAt: new Date() },
+        { upsert: true }
+      );
+
+      res.writeHead(200, corsHeaders);
+      res.end(JSON.stringify({
+        success: true,
+        message: 'הגדרות נשמרו בהצלחה'
+      }));
+      
+    } catch (error) {
+      console.error('Settings save error:', error);
+      res.writeHead(500, corsHeaders);
+      res.end(JSON.stringify({
+        success: false,
+        error: 'שגיאה בשמירת ההגדרות'
+      }));
+    }
+    return;
+  }
+
   // ==================== EVENTS ENDPOINTS ====================
+  
+  // Create new event
+  if (pathname === '/api/events' && method === 'POST') {
+    try {
+      const userInfo = await requireAuth(req, res, corsHeaders);
+      if (!userInfo) return;
+      
+      if (!(await requireAdmin(userInfo, res, corsHeaders))) return;
+
+      const eventData = await parseBody(req);
+      
+      // Validate required fields
+      if (!eventData.eventName || !eventData.eventDate || !eventData.location) {
+        res.writeHead(400, corsHeaders);
+        res.end(JSON.stringify({
+          success: false,
+          error: 'נדרש שם אירוע, תאריך ומיקום'
+        }));
+        return;
+      }
+
+      if (!db) {
+        res.writeHead(500, corsHeaders);
+        res.end(JSON.stringify({
+          success: false,
+          error: 'שגיאה בחיבור למסד הנתונים'
+        }));
+        return;
+      }
+
+      const eventsCollection = db.collection('events');
+      
+      const newEvent = {
+        _id: new ObjectId(),
+        eventName: eventData.eventName,
+        eventDate: new Date(eventData.eventDate),
+        location: eventData.location,
+        description: eventData.description || '',
+        status: eventData.status || 'planned',
+        maxCapacity: parseInt(eventData.maxCapacity) || 50,
+        testDuration: parseInt(eventData.testDuration) || 30,
+        breakBetweenTests: parseInt(eventData.breakBetweenTests) || 5,
+        dailyBreaks: eventData.dailyBreaks || [],
+        questions: eventData.questions || [],
+        registrationDesign: eventData.registrationDesign || {
+          primaryColor: '#4F46E5',
+          backgroundColor: '#F8FAFC',
+          headerText: 'רישום לבדיקות בריאות',
+          logoUrl: ''
+        },
+        totalRegistered: 0,
+        totalTested: 0,
+        totalRevenue: 0,
+        createdAt: new Date(),
+        createdBy: userInfo.userId
+      };
+
+      await eventsCollection.insertOne(newEvent);
+
+      res.writeHead(201, corsHeaders);
+      res.end(JSON.stringify({
+        success: true,
+        data: newEvent,
+        message: 'אירוע נוצר בהצלחה'
+      }));
+      
+    } catch (error) {
+      console.error('Event creation error:', error);
+      res.writeHead(500, corsHeaders);
+      res.end(JSON.stringify({
+        success: false,
+        error: 'שגיאה ביצירת האירוע'
+      }));
+    }
+    return;
+  }
   
   // Get dashboard data
   if (pathname === '/api/events/dashboard' && method === 'GET') {
